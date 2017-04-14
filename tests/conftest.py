@@ -122,7 +122,7 @@ def unused_port():
 
 
 @pytest.fixture(scope='session', params=SWINDON_BIN)
-def swindon(_proc, request, debug_routing, unused_port, TESTS_DIR):
+def swindon(_proc, request, debug_routing, unused_port, slapd, TESTS_DIR):
     SWINDON_ADDRESS = unused_port()
     PROXY_ADDRESS = unused_port()
     SESSION_POOL_ADDRESS1 = unused_port()
@@ -148,6 +148,7 @@ def swindon(_proc, request, debug_routing, unused_port, TESTS_DIR):
                             proxy_address=to_addr(PROXY_ADDRESS),
                             spool_address1=to_addr(SESSION_POOL_ADDRESS1),
                             spool_address2=to_addr(SESSION_POOL_ADDRESS2),
+                            ldap_port=slapd.port,
                             TESTS_DIR=TESTS_DIR,
                             )
     assert _check_config(config, returncode=0, __swindon_bin=swindon_bin) == ''
@@ -178,6 +179,64 @@ def swindon(_proc, request, debug_routing, unused_port, TESTS_DIR):
     finally:
         os.close(fd)
         os.remove(fname)
+
+
+LdapInfo = namedtuple('LdapInfo', 'port')
+
+INIT_LDIF = """
+dn: dc=ldap,dc=example,dc=org
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+o: example
+dc: ldap
+"""
+
+USER1_LDIF = """
+dn: uid=user1,dc=ldap,dc=example,dc=org
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: user1
+cn: user1
+sn: Doe
+loginShell: /bin/bash
+uidNumber: 88888
+gidNumber: 88888
+homeDirectory: /home/user1/
+userPassword: {SSHA}XnjCdRGr5tD5cjmcBM7WvfKeBTumAYgW
+"""
+
+@pytest.fixture(scope='session')
+def slapd(_proc, request, debug_routing, unused_port):
+    LDAP_PORT = unused_port()
+
+    proc = _proc('/usr/sbin/slapd',
+                 '-f/etc/ldap/slapd.conf',
+                 '-hldap://127.0.0.1:{}'.format(LDAP_PORT),
+                 '-dnone')
+    while True:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.connect(('127.0.0.1', LDAP_PORT))
+            except ConnectionRefusedError:
+                continue
+            break
+
+    subprocess.Popen(['ldapadd',
+        '-Hldap://127.0.0.1:{}'.format(LDAP_PORT),
+        '-Dcn=Manager,dc=ldap,dc=example,dc=org', '-w1234', '-x',
+        ]).communicate(INIT_LDIF)
+
+    subprocess.Popen(['ldapadd',
+        '-Hldap://127.0.0.1:{}'.format(LDAP_PORT),
+        '-Dcn=Manager,dc=ldap,dc=example,dc=org', '-w1234', '-x',
+        ]).communicate(USER1_LDIF)
+
+    yield LdapInfo(LDAP_PORT)
 
 
 @pytest.fixture(params=SWINDON_BIN)

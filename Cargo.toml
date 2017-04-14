@@ -49,6 +49,11 @@ libc = "0.2.21"
 scoped-tls = "0.1.0"
 self-meter-http = "0.2.1"
 
+ldap = { version="0.2.0", optional=true }
+
+[features]
+auth_ldap = ["ldap"]
+
 [[bin]]
 name = "swindon"
 path = "src/main.rs"
