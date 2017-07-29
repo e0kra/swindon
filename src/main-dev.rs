@@ -39,6 +39,7 @@ extern crate tk_pool;
 extern crate tk_sendfile;
 extern crate tokio_core;
 extern crate tokio_io;
+extern crate trimmer;
 extern crate typenum;
 
 mod authorizers;
