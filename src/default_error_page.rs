@@ -2,18 +2,18 @@ use std::io::Write;
 
 use tk_http::{Status};
 use tk_http::server::{Error, EncoderDone};
+use trimmer::{Template, Context, Variable, Var, DataError};
 
-use trimmer::{Template, Parser, Context, Variable, Var, DataError};
+use template;
 use futures::future::{ok, FutureResult};
 use incoming::{reply, Request, Encoder, IntoContext};
-
 
 #[derive(Debug)]
 pub struct StatusVar(Status);
 
 
 lazy_static! {
-    static ref template: Template = Parser::new().parse(
+    static ref TEMPLATE: Template = template::PARSER.parse(
         include_str!("default_error_page.html"))
         .expect("default error page is a valid template");
 }
@@ -31,7 +31,7 @@ pub fn error_page<S: 'static>(status: Status, mut e: Encoder<S>)
     if status.response_has_body() {
         let mut ctx = Context::new();
         ctx.set("status".into(), StatusVar(status));
-        let body = match template.render(&ctx) {
+        let body = match TEMPLATE.render(&ctx) {
             Ok(body) => body,
             Err(e) => {
                 error!("Error rendering error page for {:?}: {}", status, e);

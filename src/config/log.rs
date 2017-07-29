@@ -1,6 +1,14 @@
-use trimmer::{Template, Parser};
+use trimmer::{Template, Parser, Options};
 use rustc_serialize::{Decoder, Decodable};
 use quire::validate::{Structure, Scalar};
+
+use template;
+
+lazy_static! {
+    static ref OPTIONS: Options = Options::new()
+        .syntax_oneline()
+        .clone();
+}
 
 
 #[derive(Debug)]
@@ -17,7 +25,8 @@ impl Decodable for Format {
         }
         let raw = FormatRaw::decode(d)?;
         Ok(Format {
-            template: Parser::new().parse(&raw.template)
+            template: template::PARSER
+                .parse_with_options(&*OPTIONS, &raw.template)
                 .map_err(|e| d.error(&format!("{}", e)))?,
             template_source: raw.template,
         })

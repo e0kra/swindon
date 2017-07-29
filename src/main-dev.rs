@@ -58,6 +58,7 @@ mod request_id;
 mod routing;
 mod runtime;
 mod startup;
+mod template;
 
 use std::process::exit;
 use std::env;

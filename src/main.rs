@@ -59,6 +59,7 @@ mod request_id;
 mod routing;
 mod runtime;
 mod startup;
+mod template;
 
 use std::io::{self, Write};
 use std::time::Duration;
