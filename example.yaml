@@ -135,3 +135,28 @@ ldap-destinations:
 networks:
   localhost:
   - "127.0.0.1/8"
+
+log-formats:
+  default:
+    # TODO
+    # quotes for source_ip
+    # validator for host
+    # formatter for datetime
+    # request_line?
+    # referrer + useragent -- get from headers?
+    # is backend from request
+    # latency format
+    template: |
+      ## syntax: oneline
+      {{ request.source_ip }}
+      {{ request.host }}
+      -
+      [{{ request.datetime }}]
+      "{{ request.request_line }}"
+      {{ response.code }}
+      {{ response.size }}
+      "{{ request.referrer }}"
+      "{{ request.user_agent }}"
+      "{{ request.request_id }}"
+      {{ request.backend }}
+      {{ request.latency }}

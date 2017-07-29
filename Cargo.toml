@@ -58,7 +58,7 @@ digest-writer = "0.2.0"
 generic-array = "0.8.2"
 typenum = "1.9.0"
 regex = "0.2.2"
-trimmer = { path = "./trimmer" }
+trimmer = { path="./trimmer" }
 
 [profile.release]
 debug = true
