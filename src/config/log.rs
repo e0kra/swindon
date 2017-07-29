@@ -1,4 +1,4 @@
-use trimmer::{Template, Parser, Options};
+use trimmer::{Template, Options};
 use rustc_serialize::{Decoder, Decodable};
 use quire::validate::{Structure, Scalar};
 
