@@ -27,8 +27,9 @@ pub fn error_page<S: 'static>(status: Status, mut e: Encoder<S>)
 {
     e.status(status);
     if status.response_has_body() {
+        let status_var = StatusVar(status);
         let mut ctx = Context::new();
-        ctx.set("status".into(), StatusVar(status));
+        ctx.set("status".into(), &status_var);
         let body = match TEMPLATE.render(&ctx) {
             Ok(body) => body,
             Err(e) => {
@@ -47,12 +48,13 @@ pub fn error_page<S: 'static>(status: Status, mut e: Encoder<S>)
     ok(e.done())
 }
 
-impl Variable for StatusVar {
+impl<'a> Variable<'a> for StatusVar {
     fn typename(&self) -> &'static str {
         "Status"
     }
     fn attr<'x>(&'x self, attr: &str)
-        -> Result<Var<'x>, DataError>
+        -> Result<Var<'x, 'a>, DataError>
+        where 'a: 'x
     {
         match attr {
             "code" => Ok(Var::owned(self.0.code())),
