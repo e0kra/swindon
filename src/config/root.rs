@@ -49,6 +49,7 @@ pub struct ConfigData {
 
     pub replication: Arc<Replication>,
     pub debug_routing: bool,
+    pub debug_logging: bool,
     pub server_name: Option<String>,
 
     pub set_user: Option<String>,
@@ -95,6 +96,7 @@ pub fn config_validator<'a>() -> Structure<'a> {
 
     .member("replication", replication::validator())
     .member("debug_routing", Scalar::new().default(false))
+    .member("debug_logging", Scalar::new().default(false))
     .member("server_name", Scalar::new().optional()
         .default(concat!("swindon/", env!("CARGO_PKG_VERSION"))))
     .member("set_user", Scalar::new().optional())

@@ -3,6 +3,7 @@ listen:
 - 127.0.0.1:8000
 
 debug-routing: true
+debug-logging: true
 
 routing:
   localhost/~~swindon-status: status
@@ -135,27 +136,3 @@ ldap-destinations:
 networks:
   localhost:
   - "127.0.0.1/8"
-
-log-formats:
-  default:
-    # TODO
-    # quotes for source_ip
-    # validator for host
-    # formatter for datetime
-    # request_line?
-    # referrer + useragent -- get from headers?
-    # is backend from request
-    # latency format
-    template: |
-      {{ request.source_ip }}
-      {{ request.host }}
-      -
-      [{{ request.datetime }}]
-      "{{ request.request_line }}"
-      {{ response.code }}
-      {{ response.size }}
-      "{{ request.headers["referer"] }}"
-      "{{ request.headers["user-agent"] }}"
-      "{{ request.request_id }}"
-      {{ request.backend }}
-      {{ response.latency }}

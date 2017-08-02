@@ -1,4 +1,4 @@
-use trimmer::{Template, Options};
+use trimmer::{Template, Options, ParseError};
 use rustc_serialize::{Decoder, Decodable};
 use quire::validate::{Structure, Scalar};
 
@@ -24,12 +24,8 @@ impl Decodable for Format {
             template: String,
         }
         let raw = FormatRaw::decode(d)?;
-        Ok(Format {
-            template: template::PARSER
-                .parse_with_options(&*OPTIONS, &raw.template)
-                .map_err(|e| d.error(&format!("{}", e)))?,
-            template_source: raw.template,
-        })
+        Format::from_string(raw.template)
+            .map_err(|e| d.error(&format!("{}", e)))
     }
 }
 
@@ -44,4 +40,14 @@ impl Eq for Format { }
 pub fn format_validator<'x>() -> Structure<'x> {
     Structure::new()
     .member("template", Scalar::new())
+}
+
+impl Format {
+    pub fn from_string(template: String) -> Result<Format, ParseError> {
+        Ok(Format {
+            template: template::PARSER
+                .parse_with_options(&*OPTIONS, &template)?,
+            template_source: template,
+        })
+    }
 }
