@@ -11,13 +11,13 @@ mod authorization;
 mod authorizers;
 mod handlers;
 mod listen;
-mod log;
 mod replication;
 mod routing;
 mod session_pools;
-pub mod networks;
 pub mod http_destinations;
 pub mod ldap;
+pub mod log;
+pub mod networks;
 // handlers
 pub mod chat;
 pub mod static_files;

@@ -13,8 +13,8 @@ lazy_static! {
 
 #[derive(Debug)]
 pub struct Format {
-    template_source: String,
-    template: Template,
+    pub template_source: String,
+    pub template: Template,
 }
 
 impl Decodable for Format {

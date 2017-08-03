@@ -52,6 +52,7 @@ mod handlers;
 mod http_pools;  // TODO(tailhook) move to proxy?
 mod incoming;
 mod intern;
+mod logging;
 mod metrics;
 mod proxy;
 mod request_id;

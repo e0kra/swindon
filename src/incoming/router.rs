@@ -12,10 +12,14 @@ use default_error_page::serve_error_page;
 use request_id;
 
 use metrics::{Counter};
+use logging;
+use request_id::RequestId;
+
 
 lazy_static! {
     pub static ref REQUESTS: Counter = Counter::new();
 }
+
 
 pub struct Router {
     addr: SocketAddr,
@@ -42,7 +46,8 @@ impl Router {
 
 impl Router {
 
-    fn start_request<S: Transport>(&mut self, headers: &Head)
+    fn start_request<S: Transport>(&mut self, headers: &Head,
+        request_id: RequestId)
         -> Result<Request<S>, Error>
     {
         use self::Error::*;
@@ -50,7 +55,6 @@ impl Router {
         REQUESTS.incr(1);
         // Keep config same while processing a single request
         let cfg = self.runtime.config.get();
-        let request_id = request_id::new();
         let mut debug = Debug::new(headers, request_id, &cfg);
 
         // No path means either CONNECT host, or OPTIONS *
@@ -126,9 +130,22 @@ impl<S: Transport> Dispatcher<S> for Router {
     fn headers_received(&mut self, headers: &Head)
         -> Result<Self::Codec, ServerError>
     {
-        match self.start_request(headers) {
+        let request_id = request_id::new();
+        match self.start_request(headers, request_id) {
             Ok(x) => Ok(x),
             Err(Error::Page(status, debug)) => {
+                logging::log(&self.runtime,
+                    logging::http::EarlyError {
+                        request: logging::http::EarlyRequest {
+                            addr: self.addr,
+                            head: headers,
+                            request_id: request_id,
+                            debug: &debug,
+                        },
+                        response: logging::http::EarlyResponse {
+                            status: status,
+                        }
+                    });
                 Ok(serve_error_page(status,
                     (self.runtime.config.get(), debug)))
             }
