@@ -143,7 +143,7 @@ impl<S: Transport> Dispatcher<S> for Router {
                             debug: &debug,
                         },
                         response: logging::http::EarlyResponse {
-                            status: status,
+                            status: status.into(),
                         }
                     });
                 Ok(serve_error_page(status,

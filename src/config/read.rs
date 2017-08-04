@@ -119,6 +119,10 @@ pub fn read_config<P: AsRef<Path>>(filename: P)
             log::Format::from_string(r#"
                 {{ request.client_ip }}
                 {{ request.host }}
+                "{{ request.method }}
+                {{ request.path }}
+                {{ request.version }}"
+                {{ response.status_code }}
             "#.into()).expect("can always compile debug log"));
     }
 
